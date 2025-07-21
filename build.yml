@@ -1,4 +1,4 @@
-name: Build Kivy APK
+name: Build APK
 
 on:
   workflow_dispatch:
@@ -9,21 +9,28 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v3
 
-    - name: Set up dependencies
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
       run: |
         sudo apt update
-        sudo apt install -y python3-pip git zip unzip openjdk-17-jdk build-essential
-        pip install --upgrade pip setuptools wheel
-        pip install buildozer cython
+        sudo apt install -y zip unzip libtool libffi-dev python3-pip python3-setuptools python3-wheel autoconf automake pkg-config libssl-dev libncurses5 libncurses5-dev libtinfo5
+        pip install --upgrade pip
+        pip install cython
+        pip install buildozer
 
-    - name: Build APK with Buildozer
+    - name: Build APK
       run: |
-        buildozer android debug
+        buildozer init || true  # Skip if already present
+        buildozer -v android debug
 
     - name: Upload APK
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
       with:
-        name: planetfit-apk
+        name: my-app-release
         path: bin/*.apk
