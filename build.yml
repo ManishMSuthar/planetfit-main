@@ -1,4 +1,4 @@
-name: Build APK
+name: Build Kivy APK
 
 on:
   workflow_dispatch:
@@ -8,23 +8,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
+    - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: 17
+    - name: Set up dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y python3-pip git zip unzip openjdk-17-jdk build-essential
+        pip install --upgrade pip setuptools wheel
+        pip install buildozer cython
 
-    - name: Make gradlew executable
-      run: chmod +x ./gradlew
-
-    - name: Build APK
-      run: ./gradlew assembleDebug
+    - name: Build APK with Buildozer
+      run: |
+        buildozer android debug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: PlanetFit-debug-apk
-        path: app/build/outputs/apk/debug/app-debug.apk
+        name: planetfit-apk
+        path: bin/*.apk
